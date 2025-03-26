@@ -95,3 +95,39 @@ class TrafficDataset(Dataset):
             'boxes': label['boxes'],
             'labels': label['labels']
         }
+
+class YOLODataset(Dataset):
+    def __init__(self, root_dir, img_dir, label_dir, img_size=640, augment=True):
+        self.img_size = img_size
+        self.augment = augment
+        self.img_files = sorted(glob.glob(os.path.join(img_dir, "*.jpg")))
+        self.label_files = [
+            os.path.join(label_dir, os.path.splitext(os.path.basename(f))[0] + '.txt')
+            for f in self.img_files
+        ]
+        
+    def __getitem__(self, index):
+        # 載入並預處理圖像
+        img_path = self.img_files[index]
+        img = cv2.imread(img_path)
+        
+        # 載入標籤
+        label_path = self.label_files[index]
+        labels = []
+        if os.path.exists(label_path):
+            with open(label_path, 'r') as f:
+                labels = np.array([x.split() for x in f.read().strip().splitlines()], dtype=np.float32)
+        
+        # 轉換為YOLO格式
+        if len(labels):
+            labels = self._convert_to_yolo_format(labels)
+        
+        return img, labels
+
+    def _convert_to_yolo_format(self, labels):
+        # Convert bbox format if needed
+        # class_id, x_center, y_center, width, height
+        return labels
+    
+    def __len__(self):
+        return len(self.img_files)

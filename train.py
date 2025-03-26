@@ -43,6 +43,8 @@ def main():
     
     # 準備訓練集和驗證集
     print("正在載入 UA-DETRAC 數據集...")
+    print(f"數據集路徑: {config.UA_DETRAC_PATH}")  # 添加這行來調試路徑
+    
     train_dataset = TrafficDataset(
         root_dir=config.UA_DETRAC_PATH,
         dataset_type='UA-DETRAC',

@@ -85,3 +85,57 @@ class TrafficNet(nn.Module):
         print(f"Output shape: {x.shape}")
         
         return x
+
+class YOLOLayer(nn.Module):
+    def __init__(self, anchors, nc, img_size):
+        super(YOLOLayer, self).__init__()
+        self.anchors = anchors
+        self.nc = nc  # 類別數
+        self.img_size = img_size
+        
+        self.conv = nn.Sequential(
+            nn.Conv2d(512, 256, 1),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(0.1, inplace=True),
+            nn.Conv2d(256, len(anchors) * (5 + nc), 1)
+        )
+    
+    def forward(self, x):
+        return self.conv(x)
+
+class YOLO(nn.Module):
+    def __init__(self, config):
+        super(YOLO, self).__init__()
+        self.config = config
+        nc = len(config.YOLO_CONFIG['classes'])
+        
+        # Backbone
+        self.backbone = nn.Sequential(
+            # Layer 1: 640 x 640 x 3 -> 320 x 320 x 32
+            self._conv_block(3, 32, 3, 2),
+            # Layer 2: 320 x 320 x 32 -> 160 x 160 x 64
+            self._conv_block(32, 64, 3, 2),
+            # 繼續添加更多層...
+        )
+        
+        # Detection heads
+        anchors = [[10,13, 16,30, 33,23],  # P3/8
+                   [30,61, 62,45, 59,119],  # P4/16
+                   [116,90, 156,198, 373,326]]  # P5/32
+                   
+        self.yolo_layers = nn.ModuleList([
+            YOLOLayer(anchors[0], nc, config.YOLO_CONFIG['img_size']),
+            YOLOLayer(anchors[1], nc, config.YOLO_CONFIG['img_size']),
+            YOLOLayer(anchors[2], nc, config.YOLO_CONFIG['img_size'])
+        ])
+    
+    def _conv_block(self, in_ch, out_ch, k, s):
+        return nn.Sequential(
+            nn.Conv2d(in_ch, out_ch, k, s, padding=k//2),
+            nn.BatchNorm2d(out_ch),
+            nn.LeakyReLU(0.1, inplace=True)
+        )
+    
+    def forward(self, x):
+        features = self.backbone(x)
+        return [yolo(features) for yolo in self.yolo_layers]

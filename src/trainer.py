@@ -46,10 +46,12 @@ class ModelTrainer:
         self.model.eval()
         val_loss = 0
         with torch.no_grad():
-            for data, target in val_loader:
-                data, target = data.to(self.device), target.to(self.device)
-                output = self.model(data)
-                val_loss += self.criterion(output, target).item()
+            for batch in val_loader:
+                images = batch['images'].to(self.device)
+                labels = torch.tensor([l[0] for l in batch['labels']]).to(self.device)
+                
+                output = self.model(images)
+                val_loss += self.criterion(output, labels).item()
         return val_loss / len(val_loader)
     
     def save_checkpoint(self, epoch, val_loss):

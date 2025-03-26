@@ -1,9 +1,41 @@
 import os
 
 class Config:
-    # 數據集路徑
-    UA_DETRAC_PATH = "/Users/yangxinhan/Downloads/UA-DETRAC"
-    BDD_PATH = "data/BDD"
+    # 數據集根目錄
+    DATA_ROOT = "/Users/yangxinhan/Downloads/data"
+    UA_DETRAC_PATH = f"{DATA_ROOT}/UA-DETRAC"  # 添加這行
+    
+    # UA-DETRAC 數據集路徑
+    UA_DETRAC = {
+        'images': {
+            'train': f"{DATA_ROOT}/UA-DETRAC/images/train",
+            'val': f"{DATA_ROOT}/UA-DETRAC/images/val",
+            'test': f"{DATA_ROOT}/UA-DETRAC/images/test"
+        },
+        'labels': {
+            'train': f"{DATA_ROOT}/UA-DETRAC/labels/train",
+            'val': f"{DATA_ROOT}/UA-DETRAC/labels/val",
+            'test': f"{DATA_ROOT}/UA-DETRAC/labels/test"
+        }
+    }
+    
+    # BDD100K 數據集路徑
+    BDD100K = {
+        'images': {
+            'train': f"{DATA_ROOT}/BDD100K/bdd100k/images/100k/train",
+            'val': f"{DATA_ROOT}/BDD100K/bdd100k/images/100k/val",
+            'test': f"{DATA_ROOT}/BDD100K/bdd100k/images/100k/test"
+        }
+    }
+    
+    # YOLO 相關參數
+    YOLO_CONFIG = {
+        'img_size': 640,
+        'conf_thres': 0.25,
+        'iou_thres': 0.45,
+        'max_det': 1000,
+        'classes': ['car', 'bus', 'van', 'others']
+    }
     
     # 模型參數
     MODEL_PATH = "models"
@@ -29,3 +61,10 @@ class Config:
     # 訓練記錄
     LOG_DIR = "logs"
     CHECKPOINT_DIR = "checkpoints"
+    
+    # 視頻相關配置
+    VIDEO_DIR = "videos"  # 輸入視頻目錄
+    VIDEO_OUTPUT_DIR = "output/videos"  # 輸出視頻目錄
+    DEFAULT_VIDEO_WIDTH = 1280
+    DEFAULT_VIDEO_HEIGHT = 720
+    DEFAULT_FPS = 30
